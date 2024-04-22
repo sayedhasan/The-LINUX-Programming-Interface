@@ -53,6 +53,33 @@ the changes to the page contents made by other processes, depending on whether t
 mapping is *private* or *shared*:
 
 * *private mapping* (`MAP_PRIVATE`): Modifications to the contents of the
-  mapping are not visible to other processes and, for 
+  mapping are not visible to other processes and, for a file mapping, are not
+  carried through to the underlying file. Although the pages of a private
+  mapping are initially shared in the circumstances described above, changes ot
+  the contents of the mapping are nevertheless private to each process. The
+  kernel accomplishes this using the copy-on-write technique ([Section
+  24.2.2](#noop)). This means that whenever a process attempts to modify the
+  contents of a page, the kernel first creates a new, separate copy of that
+  page for the process (and adjusts the process's' page tables). For this
+  reason, a `MAP_PRIVATE` mapping is sometimes referred to as a *private*,
+  *copy-on-write mapping*.
 
+* *Shared mapping* (`MAP_SHARED`): Modifications to the contents of the mapping
+  are visible to other processes that share the same mapping and, for a file
+  mapping, are carried through to the underlying file.
+
+The two mapping attribute described above (file versus anonymous and private vs
+shared) can be combined in four deifferent ways, as summarized in [Table
+49-1](#table-49-1).
+
+### Table 49-1
+
+                            |                                     Mappint Type                         |
+Visibility of modifications |-------------------------------------------|------------------------------|
+                            | File                                      | Anonymous                    |
+----------------------------|-------------------------------------------|------------------------------|
+Private                     | Initializing memory from contents of file | Memory allocation            |
+----------------------------|-------------------------------------------|------------------------------|
+Shared                      | Memory-mapped I/O; sharing memory between | Sharing memory between       |
+                            | processes (IPC)                           | processes (IPC)              |
 
