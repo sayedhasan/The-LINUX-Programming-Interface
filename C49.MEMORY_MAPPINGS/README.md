@@ -15,9 +15,9 @@
 7. [Anonymous Mappings](#497-anonymous-mappings)
 8. [Remapping a Mapped Region: mremap()](#498-remapping-a-mapped-region-mremap)
 9. [MMAP_NORESERVE and Swap Space Overcommitting](#499-mmap-noreserve-and-swap-space-overcommitting)
-   10. [The MAP_FIXED Flag](#4910-the-map-fixed-flag)
-   11. [Nonlinear Mappings: *remap_file_pages()*](#4911-nonlinear-mappings-remap-file-pages)
-   12. [Summary](#4912-summary)
+   1. [The MAP_FIXED Flag](#4910-the-map-fixed-flag)
+   2. [Nonlinear Mappings: *remap_file_pages()*](#4911-nonlinear-mappings-remap-file-pages)
+   3. [Summary](#4912-summary)
 
 ## 49.1 Overview
 
