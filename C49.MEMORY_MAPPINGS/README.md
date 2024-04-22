@@ -10,13 +10,12 @@
    2. [Shared File Mappings](#4942-shared-file-mappings)
    3. [Boundary Cases](#4943-boundary-cases)
    4. [Memory Protection and File Access Mode Interactions](#4944-memory-protection-and-file-access-mode-interactions)
-
 5. [Synchronizing a Mapped Region: *msync()*](#495-synchronizing-a-mapped-region-msync)
 6. [Additional *mmap()* Flags](#496-additional-mmap-flags)
 7. [Anonymous Mappings](#497-anonymous-mappings)
 8. [Remapping a Mapped Region: mremap()](#498-remapping-a-mapped-region-mremap)
-9. [`MMAP_NORESERVE` and Swap Space Overcommitting](#499-mmap_noreserve-and-swap-space-overcommitting)
-   10. [The `MAP_FIXED` Flag](#4910-the-map-fixed-flag)
+9. [MMAP_NORESERVE and Swap Space Overcommitting](#499-mmap-noreserve-and-swap-space-overcommitting)
+   10. [The MAP_FIXED Flag](#4910-the-map-fixed-flag)
    11. [Nonlinear Mappings: *remap_file_pages()*](#4911-nonlinear-mappings-remap-file-pages)
    12. [Summary](#4912-summary)
 
