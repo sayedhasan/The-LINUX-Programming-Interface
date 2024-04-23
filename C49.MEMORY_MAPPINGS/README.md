@@ -196,7 +196,8 @@ Memory protection can be changed using the *memprotect()* system call ([Section
 
 ### Alignement restrictions specified in standards for *offset* and *addr*
 
-...
+Skip this section for now.
+
 
 ### Example program
 
@@ -204,6 +205,7 @@ Memory protection can be changed using the *memprotect()* system call ([Section
 private file mapping. This program is a simple verison of *cat(1)*. It maps the
 (entire) file named in its command-line argument, and then writes the contents
 of the mapping to standard output.
+
 
 #### Listing 49-1
 
@@ -254,5 +256,112 @@ main(int argc, char* argv[])
   exit(EXIT_SUCCESS);
 }
 ```
+
+
+## 49.3 Unmapping a Mapped Region: *munmap()*
+
+The *munmap()* system call performs the convers of *mmap()*, removing a mapping
+from the calling process's virtual address space.
+
+```c
+#include <sys/mman.h>
+
+// returns 0 on success, -1 on error
+int munmap(void* addr, size_t length);
+```
+
+The *addr* argument is the starting address of the address range to be
+unmapped.  It must be aligned to a page boundary. (SUSv3 specified that *addr
+must* be page-aligned.  SUSv4 says that an implementation *may* require this
+argument to be page-aligned.)
+
+The *length* argument is a nonnegative integer specifying the size (in bytes)
+of the region to be unmapped. The address range up to the next multiple of the
+system page size will be unmapped.
+
+Commonly, we unmap an entire mapping. Thus, we specify *addr* as the address
+returned by a previous call to *mmap()* call. Here's an example:
+
+```c
+addr = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+if (addr == MAP_FAILED) {
+  errExit("mmap");
+}
+
+/* Code for working with mapped region */
+
+if (munmap(addr, length) == -1) {
+  errExit("munmap");
+}
+```
+
+Alternatively, we can unmap part of a mapping, in which case the mapping either
+shrinks or is cut in two, depending on where the unmapping occurs. It is also
+possible to specify an address range spanning several mappings, in which case
+all of the mapping are unmapped.
+
+If there are no mappings in the address range specified by *addr* and *length*,
+then *munmap()* has noeffect, and returns 0 (for success).
+
+During unmapping, the kernel removes any memory locks that the process holds
+for the specified address range. (Memory locks are established using *mlock()*
+or *mlockall()*, as described in [Section 50.2.](#noop))
+
+All of a process's mappings are automatically unmapped when it terminates or
+perfoms an *exec()*.
+
+To ensure that the contents of a shared file mapping are written to the
+underlying file, a call to *msync()* ([Section 40.5](#noop)) should be made
+before unmapping a mapping with *munmap()*.
+
+
+## 49.4 File Mappings
+
+To create a file mapping, we perform the following steps:
+
+1. Obtain a descriptor for the file, typically via a call to *open()*.
+2. Pass that file descriptor as the *fd* argument in a call to *mmap()*.
+
+As a result of these steps, *mmap()* maps the contents of the open file into
+the address space of the calling process. Once *mmap()* maps the contents of
+the open file into the address of the calling process. Once *mmap()* has been
+called, we can close the file descriptor without affecting the mapping.
+However, in some caess it may be useful to keep this file descriptor open --
+see, for example, [Listing 49-1](#listing-49-1) and also [Chapter 54](#noop).
+
+The file referred to by the descriptor *fd* must have been opened with
+permissions appropriate for the values specified in *prot* and *flags*.  In
+particular, the file must always be opened for reading, and, if `PROT_WRITE`
+and `MAP_SHARED` are specified in *flags*, then the file must be opened for
+both reading and writing.
+
+The *offset* argument specifies the starting byte of the region to be mapped
+from the file, and must be a multiple of the system page size. Specifying
+*offset* as 0 causes the file to be mapped from the beginning. The *length*
+argument specifies the number of bytes to be mapped. Together, the *offset* and
+*length* arguments determine which region of the file is to be mapped into
+memory, as shown in [Figure 49-1.](#figure-49-1)
+
+![Figure 49-1](mmap_overview.drawio.png)
+
+
+## 49.5 Private File Mappings
+
+The two most common uses of private file mappings are the following:
+
+* To allow multiple processes executing the same program or using the same
+  shared library to share the same (read-only) text setment, which is mapped
+  from the corresponding part oft he underlying executable or library file.
+
+* To map the initialized data segment of an executable or shared library. Such
+  mappings are made private so that modifications to the contents of the mapped
+  data segment are not carried through to the underlying file.
+
+Both of these uses of *mmap()* are normally invisible to a program, because 
+these mappings are created by the program loader and dynamic ilnker. Examples
+of both kinds of mappings can be seen in the */proc/PID/maps* output shown in
+[Section 48.5.](#noop)
+
+
 
 
